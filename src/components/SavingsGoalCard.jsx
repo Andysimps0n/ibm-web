@@ -1,3 +1,5 @@
+import { useState } from 'react'
+
 export default function SavingsGoalCard({
   name,
   imageSrc,
@@ -6,12 +8,43 @@ export default function SavingsGoalCard({
   saved,
   remaining,
   dailySaving,
+  dailySavingAmount,
   percent,
   daysLeft,
   onBuy,
+  onChangeDailySaving,
 }) {
+  const [isEditingDailySaving, setIsEditingDailySaving] = useState(false)
+  const [draftDailySaving, setDraftDailySaving] = useState('')
+
+  function cancelEditDailySaving() {
+    setIsEditingDailySaving(false)
+    setDraftDailySaving('')
+  }
+
+  function handleDraftChange(event) {
+    const digitsOnly = event.target.value.replace(/[^0-9]/g, '')
+    setDraftDailySaving(digitsOnly)
+  }
+
+  function saveDailySaving(event) {
+    event.preventDefault()
+
+    const amount = Number(draftDailySaving)
+
+    if (!Number.isFinite(amount) || amount < 1) {
+      return
+    }
+
+    onChangeDailySaving(amount)
+    setIsEditingDailySaving(false)
+    setDraftDailySaving('')
+  }
+
+  const canSave = Number(draftDailySaving) >= 1
+
   return (
-    <section className="goal-card" aria-labelledby="goal-card-title">
+    <section className="SavingsGoalCard goal-card" aria-labelledby="goal-card-title">
       <div className="goal-card__hero">
         <img className="goal-card__image" src={imageSrc} alt={imageAlt} />
         <div>
@@ -40,7 +73,16 @@ export default function SavingsGoalCard({
       <div className="goal-card__progress">
         <div className="goal-card__progress-top">
           <span>진행률 {percent}%</span>
-          <span>하루 {dailySaving}</span>
+          {isEditingDailySaving ? (
+            <span>하루 저축 바꾸기</span>
+          ) : (
+            <button
+              type="button"
+              className="goal-card__daily"
+            >
+              하루 {dailySaving}
+            </button>
+          )}
         </div>
         <div
           className="goal-card__bar"
@@ -56,6 +98,43 @@ export default function SavingsGoalCard({
           />
         </div>
       </div>
+
+      {isEditingDailySaving ? (
+        <form className="goal-card__daily-form" onSubmit={saveDailySaving}>
+          <label className="goal-card__daily-label" htmlFor="daily-saving-input">
+            하루에 얼마씩 모을까요?
+          </label>
+          <div className="goal-card__daily-row">
+            <input
+              id="daily-saving-input"
+              className="goal-card__daily-input"
+              type="text"
+              inputMode="numeric"
+              pattern="[0-9]*"
+              value={draftDailySaving}
+              onChange={handleDraftChange}
+              autoFocus
+            />
+            <span className="goal-card__daily-unit">원</span>
+          </div>
+          <div className="goal-card__daily-actions">
+            <button
+              type="button"
+              className="goal-card__daily-cancel"
+              onClick={cancelEditDailySaving}
+            >
+              취소
+            </button>
+            <button
+              type="submit"
+              className="goal-card__daily-save"
+              disabled={!canSave}
+            >
+              저장
+            </button>
+          </div>
+        </form>
+      ) : null}
 
       {daysLeft > 0 ? (
         <p className="goal-card__message">

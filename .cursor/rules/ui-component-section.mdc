@@ -1,0 +1,31 @@
+---
+description: Wrap UI components in a section named after the component
+globs: src/components/**/*.jsx
+alwaysApply: false
+---
+
+# UI component wrapper
+
+When building a UI component, the outermost element must be a `<section>` whose class is the component name.
+
+Keep existing visual/BEM classes on the same element when the root is already a styled tag. Do not wrap tiny helpers (icons, one-off inner cards) this way — only exported UI components.
+
+```jsx
+// ❌ BAD — root is a div, class does not match the component
+export default function SpendingStats({ thisMonthSpent }) {
+  return (
+    <div className="stats">
+      <p>{thisMonthSpent}</p>
+    </div>
+  )
+}
+
+// ✅ GOOD — root is section, first class is the component name
+export default function SpendingStats({ thisMonthSpent }) {
+  return (
+    <section className="SpendingStats section">
+      <p>{thisMonthSpent}</p>
+    </section>
+  )
+}
+```

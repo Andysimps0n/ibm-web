@@ -1,5 +1,10 @@
 import { useState } from 'react'
-import { formatWon } from '../utils/money.js'
+import {
+  formatSavingDays,
+  getDailySavingRate,
+  getDaysToAfford,
+} from '../utils/money.js'
+import SavingPlanCard from './SavingPlanCard.jsx'
 
 const SHOP_TABS = [
   { id: 'ranking', label: '랭킹' },
@@ -7,15 +12,6 @@ const SHOP_TABS = [
   { id: 'sale', label: '세일' },
   { id: 'special', label: '스페셜' },
 ]
-
-const PAGE_SIZE = 6
-
-const SECTION_TITLES = {
-  ranking: '판매 랭킹',
-  new: '신상품',
-  sale: '세일',
-  special: '스페셜',
-}
 
 function RankChange({ value }) {
   if (!value) {
@@ -32,7 +28,7 @@ function RankChange({ value }) {
   )
 }
 
-function ProductCard({ product, isSelected, onSelect }) {
+function ProductCard({ product, isSelected, daysLabel, originalDaysLabel, onSelect }) {
   return (
     <button
       type="button"
@@ -50,10 +46,10 @@ function ProductCard({ product, isSelected, onSelect }) {
         <RankChange value={product.rankChange} />
       </div>
       <p className="product-card__name">{product.name}</p>
-      {product.originalPrice > product.price ? (
-        <p className="product-card__original">{formatWon(product.originalPrice)}</p>
+      {originalDaysLabel ? (
+        <p className="product-card__original">{originalDaysLabel}</p>
       ) : null}
-      <p className="product-card__price">{formatWon(product.price)}</p>
+      <p className="product-card__price">{daysLabel}</p>
       {product.colors.length > 0 ? (
         <span className="product-card__colors">
           {product.colors.map((color) => (
@@ -72,34 +68,33 @@ function ProductCard({ product, isSelected, onSelect }) {
 export default function ShoppingPage({
   products,
   selectedProductName,
+  savingPeriod,
+  customPeriodDays,
+  dailySavingAmount,
+  onChangeSavingPeriod,
+  onChangeCustomPeriodDays,
+  onChangeDailySaving,
   onSelectProduct,
   onGoHome,
 }) {
   const [shopTab, setShopTab] = useState('ranking')
-  const [page, setPage] = useState(0)
 
   const filtered = products.filter((product) => product.tabs.includes(shopTab))
-  const pageCount = Math.max(1, Math.ceil(filtered.length / PAGE_SIZE))
-  const safePage = Math.min(page, pageCount - 1)
-  const pageItems = filtered.slice(
-    safePage * PAGE_SIZE,
-    safePage * PAGE_SIZE + PAGE_SIZE,
-  )
-  const startRank = pageItems[0]?.rank ?? 1
-  const endRank = pageItems[pageItems.length - 1]?.rank ?? startRank
+  const dailyRate = getDailySavingRate({
+    dailySaving: dailySavingAmount,
+    savingPeriod,
+    customPeriodDays,
+  })
 
   function handleTabChange(tabId) {
     setShopTab(tabId)
-    setPage(0)
   }
 
   return (
-    <div className="shop">
+    <section className="ShoppingPage shop">
       <header className="shop__header">
         <h1 className="shop__title">위시 스토어</h1>
-        <button type="button" className="shop__shortcut" onClick={onGoHome}>
-          바로가기
-        </button>
+        <p className="shop__hint">물건을 누르면 저축 목표가 바뀌어요</p>
       </header>
 
       <div className="shop__tabs" role="tablist">
@@ -117,43 +112,32 @@ export default function ShoppingPage({
         ))}
       </div>
 
-      <div className="shop__toolbar">
-        <p className="shop__section-title">{SECTION_TITLES[shopTab]}</p>
-        <div className="shop__pager">
-          <button
-            type="button"
-            aria-label="이전"
-            disabled={safePage === 0}
-            onClick={() => setPage(safePage - 1)}
-          >
-            &lt;
-          </button>
-          <span>
-            {startRank}~{endRank}등
-          </span>
-          <button
-            type="button"
-            aria-label="다음"
-            disabled={safePage >= pageCount - 1}
-            onClick={() => setPage(safePage + 1)}
-          >
-            &gt;
-          </button>
-        </div>
-      </div>
+      <SavingPlanCard
+        savingPeriod={savingPeriod}
+        customPeriodDays={customPeriodDays}
+        dailySavingAmount={dailySavingAmount}
+        onChangeSavingPeriod={onChangeSavingPeriod}
+        onChangeCustomPeriodDays={onChangeCustomPeriodDays}
+        onChangeDailySaving={onChangeDailySaving}
+      />
 
-      <p className="shop__hint">물건을 누르면 저축 목표가 바뀌어요</p>
 
       <div className="shop__grid">
-        {pageItems.map((product) => (
+        {filtered.map((product) => (
           <ProductCard
             key={product.id}
             product={product}
             isSelected={product.shortName === selectedProductName}
+            daysLabel={formatSavingDays(getDaysToAfford(product.price, dailyRate))}
+            originalDaysLabel={
+              product.originalPrice > product.price
+                ? formatSavingDays(getDaysToAfford(product.originalPrice, dailyRate))
+                : null
+            }
             onSelect={onSelectProduct}
           />
         ))}
       </div>
-    </div>
+    </section>
   )
 }

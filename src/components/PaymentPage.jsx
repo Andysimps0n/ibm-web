@@ -31,7 +31,7 @@ export default function PaymentPage({
 
   if (step === 'done') {
     return (
-      <div className="payment">
+      <section className="PaymentPage payment">
         <div className="payment__done">
           <p className="payment__check" aria-hidden="true">
             ✓
@@ -58,12 +58,12 @@ export default function PaymentPage({
             </button>
           </div>
         </div>
-      </div>
+      </section>
     )
   }
 
   return (
-    <div className="payment">
+    <section className="PaymentPage payment">
       <header className="payment__header">
         <button type="button" className="payment__back" onClick={onCancel}>
           취소
@@ -104,6 +104,6 @@ export default function PaymentPage({
       <button type="button" className="payment__primary" onClick={handlePay}>
         {priceLabel} 결제하기
       </button>
-    </div>
+    </section>
   )
 }

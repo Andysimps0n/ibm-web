@@ -9,7 +9,7 @@ export default function SpendingStats({
   topCategoryEmoji,
 }) {
   return (
-    <section className="section" aria-labelledby="stats-title">
+    <section className="SpendingStats section" aria-labelledby="stats-title">
       <h2 id="stats-title" className="section__title">
         이번 달 소비 통계
       </h2>

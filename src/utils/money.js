@@ -6,8 +6,48 @@ function sumAmounts(items) {
   return items.reduce((total, item) => total + item.amount, 0)
 }
 
+export const SAVING_PERIODS = [
+  { id: 'daily', days: 1, label: '하루' },
+  { id: 'every-2-days', days: 2, label: '이틀' },
+  { id: 'weekly', days: 7, label: '일주일' },
+  { id: 'biweekly', days: 14, label: '2주' },
+  { id: 'monthly', days: 30, label: '한 달' },
+]
+
 export function formatWon(amount) {
   return `${amount.toLocaleString('ko-KR')}원`
+}
+
+export function getDaysToAfford(price, dailyRate) {
+  if (!Number.isFinite(dailyRate) || dailyRate <= 0) {
+    return 0
+  }
+
+  return Math.ceil(price / dailyRate)
+}
+
+export function formatSavingDays(days) {
+  return `${days}일`
+}
+
+export function getSavingPeriodDays(goal) {
+  if (goal.savingPeriod === 'custom') {
+    const customDays = Number(goal.customPeriodDays)
+
+    if (Number.isFinite(customDays) && customDays >= 1) {
+      return customDays
+    }
+
+    return 1
+  }
+
+  const period = SAVING_PERIODS.find((item) => item.id === goal.savingPeriod)
+  return period?.days ?? 1
+}
+
+export function getDailySavingRate(goal) {
+  const periodDays = getSavingPeriodDays(goal)
+  return goal.dailySaving / periodDays
 }
 
 export function getMonthSpent(transactions, yearMonth) {
@@ -19,8 +59,9 @@ export function getMonthSpent(transactions, yearMonth) {
 export function getSavingsProgress(goal) {
   const remaining = Math.max(goal.price - goal.saved, 0)
   const percent = Math.min(Math.round((goal.saved / goal.price) * 100), 100)
+  const dailyRate = getDailySavingRate(goal)
   const daysLeft =
-    remaining === 0 ? 0 : Math.ceil(remaining / goal.dailySaving)
+    remaining === 0 ? 0 : Math.ceil(remaining / dailyRate)
 
   return {
     remaining,
@@ -76,7 +117,7 @@ export function getInsights(transactions, goal, thisMonth, lastMonth) {
 
   if (deliveryThis > deliveryLast) {
     const extra = deliveryThis - deliveryLast
-    const daysFaster = Math.max(1, Math.floor(extra / goal.dailySaving))
+    const daysFaster = Math.max(1, Math.floor(extra / getDailySavingRate(goal)))
 
     insights.push({
       id: 'delivery',
@@ -89,7 +130,7 @@ export function getInsights(transactions, goal, thisMonth, lastMonth) {
 
   if (cafeThis > cafeLast) {
     const extra = cafeThis - cafeLast
-    const daysFaster = Math.max(1, Math.floor(extra / goal.dailySaving))
+    const daysFaster = Math.max(1, Math.floor(extra / getDailySavingRate(goal)))
 
     insights.push({
       id: 'cafe',

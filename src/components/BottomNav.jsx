@@ -43,34 +43,36 @@ function CartIcon() {
 
 const TABS = [
   { id: 'home', label: '홈', Icon: HomeIcon },
-  { id: 'habits', label: '소비', Icon: MoneyIcon },
-  { id: 'insights', label: '한마디', Icon: FeedbackIcon },
+  // { id: 'habits', label: '소비', Icon: MoneyIcon },
+  { id: 'insights', label: '피드백', Icon: FeedbackIcon },
   { id: 'spending', label: '통계', Icon: StatsIcon },
   { id: 'shop', label: '쇼핑', Icon: CartIcon },
 ]
 
 export default function BottomNav({ activeTab, onChange }) {
   return (
-    <nav className="bottom-nav" aria-label="하단 메뉴">
-      {TABS.map((tab) => {
-        const isActive = tab.id === activeTab
-        const Icon = tab.Icon
+    <section className="BottomNav">
+      <nav className="bottom-nav" aria-label="하단 메뉴">
+        {TABS.map((tab) => {
+          const isActive = tab.id === activeTab
+          const Icon = tab.Icon
 
-        return (
-          <button
-            key={tab.id}
-            type="button"
-            className={isActive ? 'bottom-nav__item is-active' : 'bottom-nav__item'}
-            onClick={() => onChange(tab.id)}
-            aria-current={isActive ? 'page' : undefined}
-          >
-            <span className="bottom-nav__icon">
-              <Icon />
-            </span>
-            {tab.label}
-          </button>
-        )
-      })}
-    </nav>
+          return (
+            <button
+              key={tab.id}
+              type="button"
+              className={isActive ? 'bottom-nav__item is-active' : 'bottom-nav__item'}
+              onClick={() => onChange(tab.id)}
+              aria-current={isActive ? 'page' : undefined}
+            >
+              <span className="bottom-nav__icon">
+                <Icon />
+              </span>
+              {tab.label}
+            </button>
+          )
+        })}
+      </nav>
+    </section>
   )
 }

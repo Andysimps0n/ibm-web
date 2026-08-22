@@ -11,6 +11,8 @@ export const savingsGoal = {
   price: 200000,
   saved: 80000,
   dailySaving: 5000,
+  savingPeriod: 'daily',
+  customPeriodDays: 4,
 }
 
 export const transactions = [
@@ -309,3 +311,24 @@ export const categoryMeta = {
   구독: { color: '#b57be8', emoji: '📺' },
   쇼핑: { color: '#f071a5', emoji: '🛍️' },
 }
+
+export const demoNotifications = [
+  {
+    id: 'daily-report',
+    title: '일일 리포트',
+    timeLabel: '오늘 08:00',
+    body: '오늘은 어제보다 3,200원 더 썼어요. 하지만 저번주와 흐름은 비슷해요',
+  },
+  {
+    id: 'weekly-report',
+    title: '주간 리포트',
+    timeLabel: '월요일 09:00',
+    body: '이번주는 소비량이 13% 줄었지만, 더 자주 소비하고 있어요.',
+  },
+  {
+    id: 'daily-limit',
+    title: '일일 소비량 알림',
+    timeLabel: '오늘 21:14',
+    body: '오늘 소비하기로 정한 한도를 넘었어요.',
+  },
+]

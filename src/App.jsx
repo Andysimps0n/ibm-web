@@ -1,15 +1,17 @@
 import { useEffect, useRef, useState } from 'react'
 import DashboardHeader from './components/DashboardHeader.jsx'
 import SpendingCard from './components/SpendingCard.jsx'
+import SavingPlanCard from './components/SavingPlanCard.jsx'
 import SavingsGoalCard from './components/SavingsGoalCard.jsx'
 import CategoryBreakdown from './components/CategoryBreakdown.jsx'
 import InsightsList from './components/InsightsList.jsx'
 import TransactionList from './components/TransactionList.jsx'
 import SpendingStats from './components/SpendingStats.jsx'
+import NotificationsList from './components/NotificationsList.jsx'
 import ShoppingPage from './components/ShoppingPage.jsx'
 import PaymentPage from './components/PaymentPage.jsx'
 import BottomNav from './components/BottomNav.jsx'
-import { user, savingsGoal, transactions, categoryMeta, shopProducts } from './data/seedData.js'
+import { user, savingsGoal, transactions, categoryMeta, shopProducts, demoNotifications } from './data/seedData.js'
 import {
   formatWon,
   getMonthSpent,
@@ -35,6 +37,7 @@ function App() {
   const [goal, setGoal] = useState(savingsGoal)
   const [spendingFilter, setSpendingFilter] = useState(null)
   const [theme, setTheme] = useState('green')
+  const [unreadCount, setUnreadCount] = useState(demoNotifications.length)
   const contentRef = useRef(null)
 
   const monthSpent = getMonthSpent(transactions, THIS_MONTH)
@@ -57,6 +60,11 @@ function App() {
     document.documentElement.setAttribute('data-theme', theme)
   }, [theme])
 
+  function openNotifications() {
+    setUnreadCount(0)
+    setActiveTab('notifications')
+  }
+
   function openSpending(category = null) {
     setSpendingFilter(category)
     setActiveTab('spending')
@@ -71,18 +79,38 @@ function App() {
 
   function handleSelectProduct(product) {
     setGoal({
+      ...goal,
       name: product.shortName,
       imageSrc: product.imageSrc,
       imageAlt: product.shortName,
       price: product.price,
-      saved: goal.saved,
-      dailySaving: goal.dailySaving,
     })
     setActiveTab('home')
   }
 
   function handleBuyGoal() {
     setActiveTab('payment')
+  }
+
+  function handleChangeDailySaving(amount) {
+    setGoal({
+      ...goal,
+      dailySaving: amount,
+    })
+  }
+
+  function handleChangeSavingPeriod(periodId) {
+    setGoal({
+      ...goal,
+      savingPeriod: periodId,
+    })
+  }
+
+  function handleChangeCustomPeriodDays(days) {
+    setGoal({
+      ...goal,
+      customPeriodDays: days,
+    })
   }
 
   function handleConfirmPayment() {
@@ -106,7 +134,7 @@ function App() {
       <div className="phone">
         <div
           className={
-            activeTab === 'shop' || activeTab === 'payment'
+            activeTab === 'payment'
               ? 'phone__content phone__content--flush'
               : 'phone__content'
           }
@@ -120,8 +148,18 @@ function App() {
                 avatarSrc="/avatar.png"
                 theme={theme}
                 onChangeTheme={setTheme}
+                unreadCount={unreadCount}
+                onOpenNotifications={openNotifications}
               />
 
+              <SavingPlanCard
+                savingPeriod={goal.savingPeriod}
+                customPeriodDays={goal.customPeriodDays}
+                dailySavingAmount={goal.dailySaving}
+                onChangeSavingPeriod={handleChangeSavingPeriod}
+                onChangeCustomPeriodDays={handleChangeCustomPeriodDays}
+                onChangeDailySaving={handleChangeDailySaving}
+              />
               <SavingsGoalCard
                 name={goal.name}
                 imageSrc={goal.imageSrc}
@@ -130,10 +168,13 @@ function App() {
                 saved={formatWon(goal.saved)}
                 remaining={formatWon(savings.remaining)}
                 dailySaving={formatWon(goal.dailySaving)}
+                dailySavingAmount={goal.dailySaving}
                 percent={savings.percent}
                 daysLeft={savings.daysLeft}
                 onBuy={handleBuyGoal}
+                onChangeDailySaving={handleChangeDailySaving}
               />
+
 
               <SpendingCard
                 remainingBalance={formatWon(user.remainingBalance)}
@@ -142,10 +183,19 @@ function App() {
                 onOpenHabits={() => setActiveTab('habits')}
               />
 
-              <button type="button" className="add-pill" aria-label="추가">
-                +
-              </button>
+
+
+      
             </>
+          ) : null}
+
+          {activeTab === 'notifications' ? (
+            <div className="screen">
+              <NotificationsList
+                notifications={demoNotifications}
+                onBack={() => setActiveTab('home')}
+              />
+            </div>
           ) : null}
 
           {activeTab === 'habits' ? (
@@ -203,6 +253,12 @@ function App() {
             <ShoppingPage
               products={shopProducts}
               selectedProductName={goal.name}
+              savingPeriod={goal.savingPeriod}
+              customPeriodDays={goal.customPeriodDays}
+              dailySavingAmount={goal.dailySaving}
+              onChangeSavingPeriod={handleChangeSavingPeriod}
+              onChangeCustomPeriodDays={handleChangeCustomPeriodDays}
+              onChangeDailySaving={handleChangeDailySaving}
               onSelectProduct={handleSelectProduct}
               onGoHome={() => setActiveTab('home')}
             />

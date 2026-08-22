@@ -1,6 +1,6 @@
 export default function CategoryBreakdown({ categories }) {
   return (
-    <section className="section" id="habits" aria-labelledby="habits-title">
+    <section className="CategoryBreakdown section" id="habits" aria-labelledby="habits-title">
       <h2 id="habits-title" className="section__title">
         어디에 썼나요?
       </h2>
